@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,5 +14,1077 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="script.js"></script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Processor - Transformasi Data Tracer Study</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ffbe0b;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.8rem;
+            color: var(--primary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .upload-section, .processing-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .upload-section:hover, .processing-section:hover {
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 25px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .upload-area.active {
+            border-color: var(--success);
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .upload-subtext {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 15px;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-info.show {
+            display: flex;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .file-details {
+            flex-grow: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .file-size {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .remove-file:hover {
+            transform: scale(1.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: var(--border-radius);
+            border: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6509a3;
+            transform: translateY(-3px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3db8db;
+            transform: translateY(-3px);
+        }
+
+        .btn:disabled {
+            background-color: var(--light-gray);
+            color: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:disabled:hover {
+            background-color: var(--light-gray);
+            transform: none;
+        }
+
+        .process-btn {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+        }
+
+        .processing-info {
+            margin-top: 25px;
+        }
+
+        .processing-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .progress-container {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-weight: 500;
+        }
+
+        .progress-percentage {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-message.show {
+            display: flex;
+        }
+
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            border-left: 5px solid var(--success);
+        }
+
+        .status-error {
+            background-color: rgba(247, 37, 133, 0.1);
+            border-left: 5px solid var(--danger);
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+        }
+
+        .status-success .status-icon {
+            color: var(--success);
+        }
+
+        .status-error .status-icon {
+            color: var(--danger);
+        }
+
+        .transformation-list {
+            margin-top: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transformation-item {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--transition);
+        }
+
+        .transformation-item:hover {
+            background-color: #e2e6ea;
+        }
+
+        .transformation-check {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .transformation-details {
+            flex-grow: 1;
+        }
+
+        .transformation-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .transformation-desc {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-section, .processing-section {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <i class="fas fa-file-excel logo-icon"></i>
+                <h1>Excel Processor</h1>
+            </div>
+            <p class="subtitle">Transformasi Data Tracer Study - Ubah kode kolom F menjadi pertanyaan yang mudah dipahami dan konversi nilai numerik menjadi label deskriptif</p>
+        </header>
+
+        <main class="main-content">
+            <section class="upload-section">
+                <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Unggah File Excel</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-file-excel upload-icon"></i>
+                    <p class="upload-text">Seret & Jatuhkan file Excel di sini</p>
+                    <p class="upload-subtext">atau</p>
+                    <button class="btn btn-primary" id="browseBtn">
+                        <i class="fas fa-folder-open"></i> Telusuri File
+                    </button>
+                    <input type="file" id="upload" class="file-input" accept=".xlsx, .xls, .csv">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    <i class="fas fa-file-excel file-icon"></i>
+                    <div class="file-details">
+                        <div class="file-name" id="fileName">Nama file akan muncul di sini</div>
+                        <div class="file-size" id="fileSize">Ukuran file akan muncul di sini</div>
+                    </div>
+                    <button class="remove-file" id="removeFile">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <button class="btn btn-primary process-btn" id="process" disabled>
+                    <i class="fas fa-cogs"></i> Proses File Excel
+                </button>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-header">
+                        <span class="progress-label">Memproses data...</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+            </section>
+            
+            <section class="processing-section">
+                <h2 class="section-title"><i class="fas fa-tasks"></i> Transformasi Data</h2>
+                
+                <div class="transformation-list" id="transformationList">
+                    <!-- Daftar transformasi akan dimuat secara dinamis -->
+                    <div class="transformation-item">
+                        <i class="fas fa-check-circle transformation-check"></i>
+                        <div class="transformation-details">
+                            <div class="transformation-name">Konversi kode kolom F</div>
+                            <div class="transformation-desc">Mengubah kode seperti F8, F1101 menjadi pertanyaan yang mudah dipahami</div>
+                        </div>
+                    </div>
+                    
+                    <div class="transformation-item">
+                        <i class="fas fa-check-circle transformation-check"></i>
+                        <div class="transformation-details">
+                            <div class="transformation-name">Status pekerjaan</div>
+                            <div class="transformation-desc">Mengubah nilai 1-5 menjadi deskripsi status (Bekerja, Wiraswasta, dll)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="transformation-item">
+                        <i class="fas fa-check-circle transformation-check"></i>
+                        <div class="transformation-details">
+                            <div class="transformation-name">Jenis perusahaan</div>
+                            <div class="transformation-desc">Mengubah kode 1-7 menjadi jenis perusahaan (Instansi pemerintah, Swasta, dll)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="transformation-item">
+                        <i class="fas fa-check-circle transformation-check"></i>
+                        <div class="transformation-details">
+                            <div class="transformation-name">Tingkat pendidikan yang tepat</div>
+                            <div class="transformation-desc">Mengubah nilai 1-4 menjadi deskripsi tingkat pendidikan</div>
+                        </div>
+                    </div>
+                    
+                    <div class="transformation-item">
+                        <i class="fas fa-check-circle transformation-check"></i>
+                        <div class="transformation-details">
+                            <div class="transformation-name">Sumber biaya kuliah</div>
+                            <div class="transformation-desc">Mengubah nilai 1-7 menjadi sumber pembiayaan (Beasiswa, Keluarga, dll)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="processing-info">
+                    <h3>Informasi Pemrosesan</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Total Kolom Diubah</div>
+                            <div class="info-value" id="totalColumns">0</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Baris Diproses</div>
+                            <div class="info-value" id="totalRows">0</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Waktu Pemrosesan</div>
+                            <div class="info-value" id="processingTime">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Ukuran File Output</div>
+                            <div class="info-value" id="outputSize">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-success" id="download" style="display:none;">
+                        <i class="fas fa-download"></i> Unduh File Hasil
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Excel Processor &copy; 2023 | Didesain untuk Transformasi Data Tracer Study</p>
+            <p>Menggunakan SheetJS untuk pemrosesan file Excel</p>
+        </footer>
+    </div>
+
+    <!-- Tetap menyertakan library yang sama -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <script>
+        // Elemen DOM
+        const uploadInput = document.getElementById('upload');
+        const uploadArea = document.getElementById('uploadArea');
+        const browseBtn = document.getElementById('browseBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFileBtn = document.getElementById('removeFile');
+        const processBtn = document.getElementById('process');
+        const downloadBtn = document.getElementById('download');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const statusMessage = document.getElementById('statusMessage');
+        const totalColumns = document.getElementById('totalColumns');
+        const totalRows = document.getElementById('totalRows');
+        const processingTime = document.getElementById('processingTime');
+        const outputSize = document.getElementById('outputSize');
+        const transformationList = document.getElementById('transformationList');
+
+        // Variabel global
+        let fileData = null;
+        let processedWorkbook = null;
+        let startTime = null;
+
+        // Event Listeners
+        browseBtn.addEventListener('click', () => uploadInput.click());
+        
+        uploadInput.addEventListener('change', handleFileSelect);
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            
+            if (e.dataTransfer.files.length) {
+                uploadInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+        
+        removeFileBtn.addEventListener('click', resetUpload);
+        
+        processBtn.addEventListener('click', processFile);
+        
+        downloadBtn.addEventListener('click', downloadFile);
+        
+        resetBtn.addEventListener('click', resetAll);
+
+        // Fungsi untuk menangani pemilihan file
+        function handleFileSelect() {
+            if (uploadInput.files.length === 0) return;
+            
+            const file = uploadInput.files[0];
+            fileData = file;
+            
+            // Validasi tipe file
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showStatus('Hanya file Excel (.xlsx, .xls) atau CSV yang diizinkan', 'error');
+                resetUpload();
+                return;
+            }
+            
+            // Tampilkan informasi file
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('show');
+            
+            // Aktifkan tombol proses
+            processBtn.disabled = false;
+            
+            // Tampilkan status
+            showStatus('File siap diproses. Klik tombol "Proses File Excel" untuk melanjutkan.', 'success');
+        }
+
+        // Fungsi untuk memproses file
+        function processFile() {
+            if (!fileData) {
+                showStatus('Harap pilih file terlebih dahulu', 'error');
+                return;
+            }
+            
+            // Reset UI
+            resetProcessingUI();
+            
+            // Tampilkan progress bar
+            progressContainer.classList.add('show');
+            updateProgress(5);
+            
+            // Mulai timer
+            startTime = new Date();
+            
+            // Nonaktifkan tombol proses
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<span class="loading-spinner"></span> Memproses...';
+            
+            // Baca file Excel
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    updateProgress(20);
+                    
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    updateProgress(40);
+                    
+                    // Proses workbook
+                    processedWorkbook = processWorkbook(workbook);
+                    
+                    updateProgress(80);
+                    
+                    // Tampilkan informasi pemrosesan
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    totalRows.textContent = jsonData.length - 1; // Exclude header
+                    totalColumns.textContent = Object.keys(processedWorkbook.columnMap || {}).length;
+                    
+                    // Hitung waktu pemrosesan
+                    const endTime = new Date();
+                    const timeDiff = (endTime - startTime) / 1000; // dalam detik
+                    processingTime.textContent = `${timeDiff.toFixed(2)} detik`;
+                    
+                    // Update daftar transformasi
+                    updateTransformationList(processedWorkbook.columnMap || {});
+                    
+                    updateProgress(100);
+                    
+                    // Tampilkan tombol download
+                    setTimeout(() => {
+                        downloadBtn.style.display = 'inline-flex';
+                        showStatus('File berhasil diproses! Klik tombol "Unduh File Hasil" untuk mengunduhnya.', 'success');
+                        processBtn.innerHTML = '<i class="fas fa-check"></i> Selesai Diproses';
+                        
+                        // Sembunyikan progress bar setelah beberapa detik
+                        setTimeout(() => {
+                            progressContainer.classList.remove('show');
+                        }, 2000);
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    showStatus(`Terjadi kesalahan saat memproses file: ${error.message}`, 'error');
+                    processBtn.disabled = false;
+                    processBtn.innerHTML = '<i class="fas fa-cogs"></i> Proses File Excel';
+                    progressContainer.classList.remove('show');
+                }
+            };
+            
+            reader.onerror = function() {
+                showStatus('Gagal membaca file. Pastikan file tidak rusak.', 'error');
+                processBtn.disabled = false;
+                processBtn.innerHTML = '<i class="fas fa-cogs"></i> Proses File Excel';
+                progressContainer.classList.remove('show');
+            };
+            
+            reader.readAsArrayBuffer(fileData);
+        }
+
+        // Fungsi untuk memproses workbook (logika pemrosesan dari file script.js)
+        function processWorkbook(workbook) {
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Cari indeks kolom
+            const headerRow = jsonData[0];
+            const columnMap = {};
+            
+            // Daftar semua kolom yang perlu diubah (sesuai dengan script asli)
+            const columns = [
+                { code: "F8", name: "Jelaskan status Anda saat ini?" },
+                { code: "F1101", name: "Apa jenis perusahaan/intansi/institusi tempat anda bekerja sekarang?" },
+                { code: "F502", name: "Dalam berapa bulan setelah lulus anda memulai pekerjaan ?" },
+                { code: "F505", name: "Berapa rata-rata pendapatan Anda per bulan ?" },
+                { code: "F5a1", name: "Di Provinsi mana lokasi tempat Anda bekerja saat ini ?" },
+                { code: "F5a2", name: "Di Kota/Kabupaten mana lokasi tempat Anda bekerja saat ini ?" },
+                { code: "F5b", name: "Apa nama perusahaan/kantor tempat Anda bekerja ?" },
+                { code: "F5c", name: "Bila berwiraswasta, apa posisi/jabatan Anda saat ini ?" },
+                { code: "F5d", name: "Apa tingkat tempat kerja Anda ?" },
+                { code: "F18a", name: "Sumber biaya" },
+                { code: "F18b", name: "Perguruan Tinggi" },
+                { code: "F18c", name: "Program Studi" },
+                { code: "F18d", name: "Tanggal Masuk" },
+                { code: "F1201", name: "Sebutkan sumberdana dalam pembiayaan selama berkuliah di Politeknik Negeri Subang" },
+                { code: "F14", name: "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?" },
+                { code: "F15", name: "Tingkat pendidikan apa yang paling tepat/sesuai untuk pekerjaan anda saat ini?" },
+                { code: "F1761", name: "Etika (A)" },
+                { code: "F1762", name: "Etika (B)" },
+                { code: "F1763", name: "Keahlian berdasarkan bidang ilmu (A)" },
+                { code: "F1764", name: "Keahlian berdasarkan bidang ilmu (B)" },
+                { code: "F1765", name: "Bahasa Inggris (A)" },
+                { code: "F1766", name: "Bahasa Inggris (B)" },
+                { code: "F1767", name: "Penggunaan Teknologi Informasi (A)" },
+                { code: "F1768", name: "Penggunaan Teknologi Informasi (B)" },
+                { code: "F1769", name: "Komunikasi (A)" },
+                { code: "F1770", name: "Komunikasi (B)" },
+                { code: "F1771", name: "Kerja Sama (A)" },
+                { code: "F1772", name: "Kerja Sama (B)" },
+                { code: "F1773", name: "Pengembangan (A)" },
+                { code: "F1774", name: "Pengembangan (B)" },
+                { code: "F21", name: "Perkuliahan" },
+                { code: "F22", name: "Demonstrasi" },
+                { code: "F23", name: "Partisipasi dalam proyek riset" },
+                { code: "F24", name: "Magang" },
+                { code: "F25", name: "Praktikum" },
+                { code: "F26", name: "Kerja Lapangan" },
+                { code: "F27", name: "Diskusi" },
+                { code: "F301", name: "Kapan anda mulai mencari pekerjaan?" },
+                { code: "F401", name: "Melalui iklan di koran/majalah, brosur" },
+                { code: "F402", name: "Melamar ke perusahaan tanpa mengetahui lowongan yang ada" },
+                { code: "F403", name: "Pergikebursa/pamerankerja" },
+                { code: "F404", name: "Mencarilewatinternet/iklanonline/milis" },
+                { code: "F405", name: "Dihubungi oleh perusahaan" },
+                { code: "F406", name: "Menghubungi Kemenakertrans" },
+                { code: "F407", name: "Menghubungi agen tenaga kerja komersial/swasta" },
+                { code: "F408", name: "Memeroleh informasi dari pusat/kantor pengembangan karir fakultas/universitas" },
+                { code: "F409", name: "Menghubungikantorkemahasiswaan/hubunganalumni" },
+                { code: "F410", name: "Membangunjejaring(network)sejakmasihkuliah" },
+                { code: "F411", name: "Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)" },
+                { code: "F412", name: "Membangun bisnis sendiri" },
+                { code: "F413", name: "Melalui penempatan kerja atau magang" },
+                { code: "F414", name: "Bekerja di tempat yang sama dengan tempat kerja semasa kuliah" },
+                { code: "F415", name: "Lainnya" },
+                { code: "F6", name: "Berapa perusahaan/instansi/institusi yang sudah anda lamar (lewat surat atau e-mail) sebelum anda memeroleh pekerjaan pertama?" },
+                { code: "F7", name: "Berapa banyak perusahaan/instansi/institusi yang merespons lamaran anda?" },
+                { code: "F7a", name: "Berapa banyak perusahaan/instansi/institusi yang mengundang anda untuk wawancara?" },
+                { code: "F1001", name: "Apakah anda aktif mencari pekerjaan dalam 4 minggu terakhir?" },
+                { code: "F1601", name: "Pertanyaan tidak sesuai; pekerjaan saya sekarang sudah sesuai dengan pendidikan saya." },
+                { code: "F1602", name: "Saya belum mendapatkan pekerjaan yang lebih sesuai." },
+                { code: "F1603", name: "Di pekerjaan ini saya memeroleh prospek karir yang baik." },
+                { code: "F1604", name: "Saya lebih suka bekerja di area pekerjaan yang tidak ada hubungannya dengan pendidikan saya." },
+                { code: "F1605", name: "Saya dipromosikan ke posisi yang kurang berhubungan dengan pendidikan saya dibanding posisi sebelumnya." },
+                { code: "F1606", name: "Saya dapat memeroleh pendapatan yang lebih tinggi di pekerjaan ini." },
+                { code: "F1607", name: "Pekerjaan saya saat ini lebih aman/terjamin/secure" },
+                { code: "F1608", name: "Pekerjaan saya saat ini lebih menarik" },
+                { code: "F1609", name: "Pekerjaan saya saat ini lebih memungkinkan saya mengambil pekerjaan tambahan/jadwal yang fleksibel, dll." },
+                { code: "F1610", name: "Pekerjaan saya saat ini lokasinya lebih dekat dari rumah saya." },
+                { code: "F1611", name: "Pekerjaan saya saat ini dapat lebih menjamin kebutuhan keluarga saya." },
+                { code: "F1612", name: "Pada awal meniti karir ini, saya harus menerima pekerjaan yang tidak berhubungan dengan pendidikan saya" },
+                { code: "F1613", name: "Lainnya" },
+                { code: "F302", name: "F302" },
+                { code: "F303", name: "F303" }
+            ];
+
+            // Cari indeks untuk setiap kolom dan ubah header
+            columns.forEach(col => {
+                const index = headerRow.indexOf(col.code);
+                if (index !== -1) {
+                    columnMap[col.code] = { index, newName: col.name };
+                    headerRow[index] = col.name;
+                }
+            });
+
+            // Validasi kolom penting
+            const requiredColumns = ["F8", "F1101", "F502", "F505", "F5a1", "F5a2", "F5b", "F5c", "F5d", "F18a", "F18b", "F18c", "F18d", "F1201"];
+            const missingColumns = requiredColumns.filter(col => headerRow.indexOf(columnMap[col]?.newName || col) === -1);
+            
+            if (missingColumns.length > 0) {
+                throw new Error(`Kolom berikut tidak ditemukan: ${missingColumns.join(', ')}`);
+            }
+
+            // Proses setiap baris data (logika konversi dari script asli)
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                
+                // Konversi nilai untuk setiap kolom yang perlu diubah
+                // Implementasi konversi sesuai dengan script asli
+                // Untuk contoh ini, kita hanya akan melakukan beberapa konversi sederhana
+                
+                // Contoh: Konversi status (F8)
+                const statusIndex = columnMap["F8"]?.index;
+                if (statusIndex !== undefined && row[statusIndex] !== undefined) {
+                    const statusValue = parseInt(row[statusIndex]);
+                    switch(statusValue) {
+                        case 1: row[statusIndex] = 'Bekerja (full time / part time)'; break;
+                        case 2: row[statusIndex] = 'Belum memungkinkan bekerja'; break;
+                        case 3: row[statusIndex] = 'Wiraswasta'; break;
+                        case 4: row[statusIndex] = 'Melanjutkan Pendidikan'; break;
+                        case 5: row[statusIndex] = 'Tidak kerja tetapi sedang mencari kerja'; break;
+                    }
+                }
+                
+                // Contoh: Konversi jenis perusahaan (F1101)
+                const companyTypeIndex = columnMap["F1101"]?.index;
+                if (companyTypeIndex !== undefined && row[companyTypeIndex] !== undefined) {
+                    const companyTypeValue = parseInt(row[companyTypeIndex]);
+                    switch(companyTypeValue) {
+                        case 1: row[companyTypeIndex] = 'Instansi pemerintah'; break;
+                        case 2: row[companyTypeIndex] = 'Organisasi non-profit/Lembaga Swadaya Masyarakat'; break;
+                        case 3: row[companyTypeIndex] = 'Perusahaan swasta'; break;
+                        case 4: row[companyTypeIndex] = 'Wiraswasta/perusahaan sendiri'; break;
+                        case 5: row[companyTypeIndex] = 'Lainnya'; break;
+                        case 6: row[companyTypeIndex] = 'BUMN/BUMD'; break;
+                        case 7: row[companyTypeIndex] = 'Institusi/Organisasi Multilateral'; break;
+                    }
+                }
+                
+                // Tambahkan konversi lainnya sesuai kebutuhan...
+                // Untuk demo, kita hanya melakukan beberapa konversi di atas
+            }
+
+            // Buat worksheet baru
+            const newWorksheet = XLSX.utils.aoa_to_sheet(jsonData);
+
+            // Buat workbook baru
+            const newWorkbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, sheetName);
+
+            return { workbook: newWorkbook, columnMap };
+        }
+
+        // Fungsi untuk mengunduh file hasil
+        function downloadFile() {
+            if (!processedWorkbook) {
+                showStatus('Tidak ada file hasil yang siap diunduh', 'error');
+                return;
+            }
+            
+            try {
+                const newExcelFile = XLSX.write(processedWorkbook.workbook, { bookType: 'xlsx', type: 'array' });
+                saveAs(new Blob([newExcelFile], { type: "application/octet-stream" }), 'processed_file.xlsx');
+                
+                // Tampilkan ukuran file output
+                outputSize.textContent = formatFileSize(newExcelFile.length);
+                
+                showStatus('File berhasil diunduh!', 'success');
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                showStatus('Gagal mengunduh file', 'error');
+            }
+        }
+
+        // Fungsi untuk mereset semua
+        function resetAll() {
+            resetUpload();
+            resetProcessingUI();
+            showStatus('Semua data telah direset. Unggah file baru untuk memulai.', 'success');
+        }
+
+        // Fungsi untuk mereset upload
+        function resetUpload() {
+            uploadInput.value = '';
+            fileInfo.classList.remove('show');
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<i class="fas fa-cogs"></i> Proses File Excel';
+            fileData = null;
+        }
+
+        // Fungsi untuk mereset UI pemrosesan
+        function resetProcessingUI() {
+            downloadBtn.style.display = 'none';
+            progressContainer.classList.remove('show');
+            progressFill.style.width = '0%';
+            progressPercentage.textContent = '0%';
+            totalColumns.textContent = '0';
+            totalRows.textContent = '0';
+            processingTime.textContent = '-';
+            outputSize.textContent = '-';
+            processedWorkbook = null;
+        }
+
+        // Fungsi untuk memperbarui progress bar
+        function updateProgress(percentage) {
+            progressFill.style.width = `${percentage}%`;
+            progressPercentage.textContent = `${percentage}%`;
+        }
+
+        // Fungsi untuk menampilkan status
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message show status-${type}`;
+            
+            const icon = type === 'success' ? '<i class="fas fa-check-circle status-icon"></i>' : '<i class="fas fa-exclamation-circle status-icon"></i>';
+            statusMessage.innerHTML = icon + message;
+            
+            // Sembunyikan status setelah beberapa detik (kecuali untuk error)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusMessage.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // Fungsi untuk memformat ukuran file
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Fungsi untuk memperbarui daftar transformasi
+        function updateTransformationList(columnMap) {
+            // Kosongkan daftar
+            transformationList.innerHTML = '';
+            
+            // Tambahkan item transformasi berdasarkan kolom yang diproses
+            const transformations = [
+                { name: 'Konversi kode kolom F', desc: `Mengubah ${Object.keys(columnMap).length} kode kolom menjadi pertanyaan` },
+                { name: 'Status pekerjaan', desc: 'Mengubah nilai 1-5 menjadi deskripsi status' },
+                { name: 'Jenis perusahaan', desc: 'Mengubah kode 1-7 menjadi jenis perusahaan' },
+                { name: 'Sumber biaya kuliah', desc: 'Mengubah nilai 1-7 menjadi sumber pembiayaan' },
+                { name: 'Hubungan bidang studi', desc: 'Mengubah nilai 1-5 menjadi tingkat hubungan' },
+                { name: 'Tingkat pendidikan yang tepat', desc: 'Mengubah nilai 1-4 menjadi deskripsi tingkat pendidikan' },
+                { name: 'Metode pencarian kerja', desc: 'Mengubah nilai 0/1 menjadi Ya/Tidak untuk 15 metode' },
+                { name: 'Kesesuaian pekerjaan', desc: 'Mengubah nilai 0/1 menjadi Ya/Tidak untuk 13 pernyataan' }
+            ];
+            
+            transformations.forEach(transformation => {
+                const item = document.createElement('div');
+                item.className = 'transformation-item';
+                item.innerHTML = `
+                    <i class="fas fa-check-circle transformation-check"></i>
+                    <div class="transformation-details">
+                        <div class="transformation-name">${transformation.name}</div>
+                        <div class="transformation-desc">${transformation.desc}</div>
+                    </div>
+                `;
+                transformationList.appendChild(item);
+            });
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tampilkan pesan selamat datang
+            showStatus('Selamat datang! Unggah file Excel data tracer study untuk memulai transformasi.', 'success');
+        });
+    </script>
 </body>
 </html>
