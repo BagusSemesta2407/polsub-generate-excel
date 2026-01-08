@@ -816,157 +816,438 @@
         }
 
         // Fungsi untuk memproses workbook (logika pemrosesan dari file script.js)
-        function processWorkbook(workbook) {
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // Fungsi untuk memproses workbook (logika pemrosesan dari file script.js)
+function processWorkbook(workbook) {
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            // Cari indeks kolom
-            const headerRow = jsonData[0];
-            const columnMap = {};
-            
-            // Daftar semua kolom yang perlu diubah (sesuai dengan script asli)
-            const columns = [
-                { code: "F8", name: "Jelaskan status Anda saat ini?" },
-                { code: "F1101", name: "Apa jenis perusahaan/intansi/institusi tempat anda bekerja sekarang?" },
-                { code: "F502", name: "Dalam berapa bulan setelah lulus anda memulai pekerjaan ?" },
-                { code: "F505", name: "Berapa rata-rata pendapatan Anda per bulan ?" },
-                { code: "F5a1", name: "Di Provinsi mana lokasi tempat Anda bekerja saat ini ?" },
-                { code: "F5a2", name: "Di Kota/Kabupaten mana lokasi tempat Anda bekerja saat ini ?" },
-                { code: "F5b", name: "Apa nama perusahaan/kantor tempat Anda bekerja ?" },
-                { code: "F5c", name: "Bila berwiraswasta, apa posisi/jabatan Anda saat ini ?" },
-                { code: "F5d", name: "Apa tingkat tempat kerja Anda ?" },
-                { code: "F18a", name: "Sumber biaya" },
-                { code: "F18b", name: "Perguruan Tinggi" },
-                { code: "F18c", name: "Program Studi" },
-                { code: "F18d", name: "Tanggal Masuk" },
-                { code: "F1201", name: "Sebutkan sumberdana dalam pembiayaan selama berkuliah di Politeknik Negeri Subang" },
-                { code: "F14", name: "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?" },
-                { code: "F15", name: "Tingkat pendidikan apa yang paling tepat/sesuai untuk pekerjaan anda saat ini?" },
-                { code: "F1761", name: "Etika (A)" },
-                { code: "F1762", name: "Etika (B)" },
-                { code: "F1763", name: "Keahlian berdasarkan bidang ilmu (A)" },
-                { code: "F1764", name: "Keahlian berdasarkan bidang ilmu (B)" },
-                { code: "F1765", name: "Bahasa Inggris (A)" },
-                { code: "F1766", name: "Bahasa Inggris (B)" },
-                { code: "F1767", name: "Penggunaan Teknologi Informasi (A)" },
-                { code: "F1768", name: "Penggunaan Teknologi Informasi (B)" },
-                { code: "F1769", name: "Komunikasi (A)" },
-                { code: "F1770", name: "Komunikasi (B)" },
-                { code: "F1771", name: "Kerja Sama (A)" },
-                { code: "F1772", name: "Kerja Sama (B)" },
-                { code: "F1773", name: "Pengembangan (A)" },
-                { code: "F1774", name: "Pengembangan (B)" },
-                { code: "F21", name: "Perkuliahan" },
-                { code: "F22", name: "Demonstrasi" },
-                { code: "F23", name: "Partisipasi dalam proyek riset" },
-                { code: "F24", name: "Magang" },
-                { code: "F25", name: "Praktikum" },
-                { code: "F26", name: "Kerja Lapangan" },
-                { code: "F27", name: "Diskusi" },
-                { code: "F301", name: "Kapan anda mulai mencari pekerjaan?" },
-                { code: "F401", name: "Melalui iklan di koran/majalah, brosur" },
-                { code: "F402", name: "Melamar ke perusahaan tanpa mengetahui lowongan yang ada" },
-                { code: "F403", name: "Pergikebursa/pamerankerja" },
-                { code: "F404", name: "Mencarilewatinternet/iklanonline/milis" },
-                { code: "F405", name: "Dihubungi oleh perusahaan" },
-                { code: "F406", name: "Menghubungi Kemenakertrans" },
-                { code: "F407", name: "Menghubungi agen tenaga kerja komersial/swasta" },
-                { code: "F408", name: "Memeroleh informasi dari pusat/kantor pengembangan karir fakultas/universitas" },
-                { code: "F409", name: "Menghubungikantorkemahasiswaan/hubunganalumni" },
-                { code: "F410", name: "Membangunjejaring(network)sejakmasihkuliah" },
-                { code: "F411", name: "Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)" },
-                { code: "F412", name: "Membangun bisnis sendiri" },
-                { code: "F413", name: "Melalui penempatan kerja atau magang" },
-                { code: "F414", name: "Bekerja di tempat yang sama dengan tempat kerja semasa kuliah" },
-                { code: "F415", name: "Lainnya" },
-                { code: "F6", name: "Berapa perusahaan/instansi/institusi yang sudah anda lamar (lewat surat atau e-mail) sebelum anda memeroleh pekerjaan pertama?" },
-                { code: "F7", name: "Berapa banyak perusahaan/instansi/institusi yang merespons lamaran anda?" },
-                { code: "F7a", name: "Berapa banyak perusahaan/instansi/institusi yang mengundang anda untuk wawancara?" },
-                { code: "F1001", name: "Apakah anda aktif mencari pekerjaan dalam 4 minggu terakhir?" },
-                { code: "F1601", name: "Pertanyaan tidak sesuai; pekerjaan saya sekarang sudah sesuai dengan pendidikan saya." },
-                { code: "F1602", name: "Saya belum mendapatkan pekerjaan yang lebih sesuai." },
-                { code: "F1603", name: "Di pekerjaan ini saya memeroleh prospek karir yang baik." },
-                { code: "F1604", name: "Saya lebih suka bekerja di area pekerjaan yang tidak ada hubungannya dengan pendidikan saya." },
-                { code: "F1605", name: "Saya dipromosikan ke posisi yang kurang berhubungan dengan pendidikan saya dibanding posisi sebelumnya." },
-                { code: "F1606", name: "Saya dapat memeroleh pendapatan yang lebih tinggi di pekerjaan ini." },
-                { code: "F1607", name: "Pekerjaan saya saat ini lebih aman/terjamin/secure" },
-                { code: "F1608", name: "Pekerjaan saya saat ini lebih menarik" },
-                { code: "F1609", name: "Pekerjaan saya saat ini lebih memungkinkan saya mengambil pekerjaan tambahan/jadwal yang fleksibel, dll." },
-                { code: "F1610", name: "Pekerjaan saya saat ini lokasinya lebih dekat dari rumah saya." },
-                { code: "F1611", name: "Pekerjaan saya saat ini dapat lebih menjamin kebutuhan keluarga saya." },
-                { code: "F1612", name: "Pada awal meniti karir ini, saya harus menerima pekerjaan yang tidak berhubungan dengan pendidikan saya" },
-                { code: "F1613", name: "Lainnya" },
-                { code: "F302", name: "F302" },
-                { code: "F303", name: "F303" }
-            ];
+    // Cari indeks kolom (sesuai dengan kode asli)
+    const headerRow = jsonData[0];
+    
+    // Cari semua indeks kolom seperti pada kode asli
+    const statusIndex = headerRow.indexOf("F8");
+    const startJobIndex = headerRow.indexOf("F502");
+    const incomeIndex = headerRow.indexOf("F505");
+    const provinceIndex = headerRow.indexOf("F5a1");
+    const kabupatenIndex = headerRow.indexOf("F5a2");
+    const jenisPerusahaanIndex = headerRow.indexOf("F1101");
+    const companyNameIndex = headerRow.indexOf("F5b");
+    const positionIfSelfEmployedIndex = headerRow.indexOf("F5c");
+    const levelCompanyIndex = headerRow.indexOf("F5d");
+    const sourceOfFundIndex = headerRow.indexOf("F18a");
+    const collegeNameIndex = headerRow.indexOf("F18b");
+    const programStudyIndex = headerRow.indexOf("F18c");
+    const startDateIndex = headerRow.indexOf("F18d");
+    const biayaKuliahIndex = headerRow.indexOf("F1201");
+    const hubunganBidangStudiIndex = headerRow.indexOf("F14");
+    const tingkatPendidikanYangTepatIndex = headerRow.indexOf("F15");
+    const etikaAIndex = headerRow.indexOf("F1761");
+    const etikaBIndex = headerRow.indexOf("F1762");
+    const keahlianAIndex = headerRow.indexOf("F1763");
+    const keahlianBIndex = headerRow.indexOf("F1764");
+    const englishAIndex = headerRow.indexOf("F1765");
+    const englishBIndex = headerRow.indexOf("F1766");
+    const useItAIndex = headerRow.indexOf("F1767");
+    const useItBIndex = headerRow.indexOf("F1768");
+    const komunikasiAIndex = headerRow.indexOf("F1769");
+    const komunikasiBIndex = headerRow.indexOf("F1770");
+    const kerjaSamaAIndex = headerRow.indexOf("F1771");
+    const kerjaSamaBIndex = headerRow.indexOf("F1772");
+    const pengembanganAIndex = headerRow.indexOf("F1773");
+    const pengembanganBIndex = headerRow.indexOf("F1774");
+    const perkuliahanIndex = headerRow.indexOf("F21");
+    const demonstrasiIndex = headerRow.indexOf("F22");
+    const projekAkhirIndex = headerRow.indexOf("F23");
+    const magangIndex = headerRow.indexOf("F24");
+    const praktikumIndex = headerRow.indexOf("F25");
+    const kerjaLapanganIndex = headerRow.indexOf("F26");
+    const diskusiIndex = headerRow.indexOf("F27");
+    const f301Index = headerRow.indexOf("F301");
+    const f302Index = headerRow.indexOf("F302");
+    const f303Index = headerRow.indexOf("F303");
+    const f401Index = headerRow.indexOf("F401");
+    const f402Index = headerRow.indexOf("F402");
+    const f403Index = headerRow.indexOf("F403");
+    const f404Index = headerRow.indexOf("F404");
+    const f405Index = headerRow.indexOf("F405");
+    const f406Index = headerRow.indexOf("F406");
+    const f407Index = headerRow.indexOf("F407");
+    const f408Index = headerRow.indexOf("F408");
+    const f409Index = headerRow.indexOf("F409");
+    const f410Index = headerRow.indexOf("F410");
+    const f411Index = headerRow.indexOf("F411");
+    const f412Index = headerRow.indexOf("F412");
+    const f413Index = headerRow.indexOf("F413");
+    const f414Index = headerRow.indexOf("F414");
+    const f415Index = headerRow.indexOf("F415");
+    const f6Index = headerRow.indexOf("F6");
+    const f7Index = headerRow.indexOf("F7");
+    const f7aIndex = headerRow.indexOf("F7a");
+    const f1001Index = headerRow.indexOf("F1001");
+    const f1601Index = headerRow.indexOf("F1601");
+    const f1602Index = headerRow.indexOf("F1602");
+    const f1603Index = headerRow.indexOf("F1603");
+    const f1604Index = headerRow.indexOf("F1604");
+    const f1605Index = headerRow.indexOf("F1605");
+    const f1606Index = headerRow.indexOf("F1606");
+    const f1607Index = headerRow.indexOf("F1607");
+    const f1608Index = headerRow.indexOf("F1608");
+    const f1609Index = headerRow.indexOf("F1609");
+    const f1610Index = headerRow.indexOf("F1610");
+    const f1611Index = headerRow.indexOf("F1611");
+    const f1612Index = headerRow.indexOf("F1612");
+    const f1613Index = headerRow.indexOf("F1613");
 
-            // Cari indeks untuk setiap kolom dan ubah header
-            columns.forEach(col => {
-                const index = headerRow.indexOf(col.code);
-                if (index !== -1) {
-                    columnMap[col.code] = { index, newName: col.name };
-                    headerRow[index] = col.name;
-                }
-            });
+    // Validasi kolom penting
+    if (statusIndex === -1) throw new Error('Kolom "F8" tidak ditemukan');
+    if (jenisPerusahaanIndex === -1) throw new Error('Kolom "F1101" tidak ditemukan');
+    if (startJobIndex === -1) throw new Error('Kolom "F502" tidak ditemukan');
+    if (incomeIndex === -1) throw new Error('Kolom "F505" tidak ditemukan');
+    if (provinceIndex === -1) throw new Error('Kolom "F5a1" tidak ditemukan');
+    if (kabupatenIndex === -1) throw new Error('Kolom "F5a2" tidak ditemukan');
+    if (companyNameIndex === -1) throw new Error('Kolom "F5b" tidak ditemukan');
+    if (positionIfSelfEmployedIndex === -1) throw new Error('Kolom "F5c" tidak ditemukan');
+    if (levelCompanyIndex === -1) throw new Error('Kolom "F5d" tidak ditemukan');
+    if (sourceOfFundIndex === -1) throw new Error('Kolom "F18a" tidak ditemukan');
+    if (collegeNameIndex === -1) throw new Error('Kolom "F18b" tidak ditemukan');
+    if (programStudyIndex === -1) throw new Error('Kolom "F18c" tidak ditemukan');
+    if (startDateIndex === -1) throw new Error('Kolom "F18d" tidak ditemukan');
+    if (biayaKuliahIndex === -1) throw new Error('Kolom "F1201" tidak ditemukan');
 
-            // Validasi kolom penting
-            const requiredColumns = ["F8", "F1101", "F502", "F505", "F5a1", "F5a2", "F5b", "F5c", "F5d", "F18a", "F18b", "F18c", "F18d", "F1201"];
-            const missingColumns = requiredColumns.filter(col => headerRow.indexOf(columnMap[col]?.newName || col) === -1);
-            
-            if (missingColumns.length > 0) {
-                throw new Error(`Kolom berikut tidak ditemukan: ${missingColumns.join(', ')}`);
-            }
+    // Ganti header (menggunakan mapping yang sama dengan kode asli)
+    headerRow[statusIndex] = "Jelaskan status Anda saat ini?";
+    headerRow[jenisPerusahaanIndex] = "Apa jenis perusahaan/intansi/institusi tempat anda bekerja sekarang?";
+    headerRow[startJobIndex] = "Dalam berapa bulan setelah lulus anda memulai pekerjaan ?";
+    headerRow[incomeIndex] = "Berapa rata-rata pendapatan Anda per bulan ?";
+    headerRow[provinceIndex] = "Di Provinsi mana lokasi tempat Anda bekerja saat ini ?";
+    headerRow[kabupatenIndex] = "Di Kota/Kabupaten mana lokasi tempat Anda bekerja saat ini ?";
+    headerRow[companyNameIndex] = "Apa nama perusahaan/kantor tempat Anda bekerja ?";
+    headerRow[positionIfSelfEmployedIndex] = "Bila berwiraswasta, apa posisi/jabatan Anda saat ini ?";
+    headerRow[levelCompanyIndex] = "Apa tingkat tempat kerja Anda ?";
+    headerRow[sourceOfFundIndex] = "Sumber biaya";
+    headerRow[collegeNameIndex] = "Perguruan Tinggi";
+    headerRow[programStudyIndex] = "Program Studi";
+    headerRow[startDateIndex] = "Tanggal Masuk";
+    headerRow[biayaKuliahIndex] = "Sebutkan sumberdana dalam pembiayaan selama berkuliah di Politeknik Negeri Subang";
+    headerRow[hubunganBidangStudiIndex] = "Seberapa erat hubungan bidang studi dengan pekerjaan Anda?";
+    headerRow[tingkatPendidikanYangTepatIndex] = "Tingkat pendidikan apa yang paling tepat/sesuai untuk pekerjaan anda saat ini?";
+    headerRow[etikaAIndex] = "Etika (A)";
+    headerRow[etikaBIndex] = "Etika (B)";
+    headerRow[keahlianAIndex] = "Keahlian berdasarkan bidang ilmu (A)";
+    headerRow[keahlianBIndex] = "Keahlian berdasarkan bidang ilmu (B)";
+    headerRow[englishAIndex] = "Bahasa Inggris (A)";
+    headerRow[englishBIndex] = "Bahasa Inggris (B)";
+    headerRow[useItAIndex] = "Penggunaan Teknologi Informasi (A)";
+    headerRow[useItBIndex] = "Penggunaan Teknologi Informasi (B)";
+    headerRow[komunikasiAIndex] = "Komunikasi (A)";
+    headerRow[komunikasiBIndex] = "Komunikasi (B)";
+    headerRow[kerjaSamaAIndex] = "Kerja Sama (A)";
+    headerRow[kerjaSamaBIndex] = "Kerja Sama (B)";
+    headerRow[pengembanganAIndex] = "Pengembangan (A)";
+    headerRow[pengembanganBIndex] = "Pengembangan (B)";
+    headerRow[perkuliahanIndex] = "Perkuliahan";
+    headerRow[demonstrasiIndex] = "Demonstrasi";
+    headerRow[projekAkhirIndex] = "Partisipasi dalam proyek riset";
+    headerRow[magangIndex] = "Magang";
+    headerRow[praktikumIndex] = "Praktikum";
+    headerRow[kerjaLapanganIndex] = "Kerja Lapangan";
+    headerRow[diskusiIndex] = "Diskusi";
+    headerRow[f301Index] = "Kapan anda mulai mencari pekerjaan?";
+    headerRow[f401Index] = "Melalui iklan di koran/majalah, brosur";
+    headerRow[f402Index] = "Melamar ke perusahaan tanpa mengetahui lowongan yang ada";
+    headerRow[f403Index] = "Pergikebursa/pamerankerja";
+    headerRow[f404Index] = "Mencarilewatinternet/iklanonline/milis";
+    headerRow[f405Index] = "Dihubungi oleh perusahaan";
+    headerRow[f406Index] = "Menghubungi Kemenakertrans";
+    headerRow[f407Index] = "Menghubungi agen tenaga kerja komersial/swasta";
+    headerRow[f408Index] = "Memeroleh informasi dari pusat/kantor pengembangan karir fakultas/universitas";
+    headerRow[f409Index] = "Menghubungikantorkemahasiswaan/hubunganalumni";
+    headerRow[f410Index] = "Membangunjejaring(network)sejakmasihkuliah";
+    headerRow[f411Index] = "Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)";
+    headerRow[f412Index] = "Membangun bisnis sendiri";
+    headerRow[f413Index] = "Melalui penempatan kerja atau magang";
+    headerRow[f414Index] = "Bekerja di tempat yang sama dengan tempat kerja semasa kuliah";
+    headerRow[f415Index] = "Lainnya";
+    headerRow[f6Index] = "Berapa perusahaan/instansi/institusi yang sudah anda lamar (lewat surat atau e-mail) sebelum anda memeroleh pekerjaan pertama?";
+    headerRow[f7Index] = "Berapa banyak perusahaan/instansi/institusi yang merespons lamaran anda?";
+    headerRow[f7aIndex] = "Berapa banyak perusahaan/instansi/institusi yang mengundang anda untuk wawancara?";
+    headerRow[f1001Index] = "Apakah anda aktif mencari pekerjaan dalam 4 minggu terakhir?";
+    headerRow[f1601Index] = "Pertanyaan tidak sesuai; pekerjaan saya sekarang sudah sesuai dengan pendidikan saya.";
+    headerRow[f1602Index] = "Saya belum mendapatkan pekerjaan yang lebih sesuai.";
+    headerRow[f1603Index] = "Di pekerjaan ini saya memeroleh prospek karir yang baik.";
+    headerRow[f1604Index] = "Saya lebih suka bekerja di area pekerjaan yang tidak ada hubungannya dengan pendidikan saya.";
+    headerRow[f1605Index] = "Saya dipromosikan ke posisi yang kurang berhubungan dengan pendidikan saya dibanding posisi sebelumnya.";
+    headerRow[f1606Index] = "Saya dapat memeroleh pendapatan yang lebih tinggi di pekerjaan ini.";
+    headerRow[f1607Index] = "Pekerjaan saya saat ini lebih aman/terjamin/secure";
+    headerRow[f1608Index] = "Pekerjaan saya saat ini lebih menarik";
+    headerRow[f1609Index] = "Pekerjaan saya saat ini lebih memungkinkan saya mengambil pekerjaan tambahan/jadwal yang fleksibel, dll.";
+    headerRow[f1610Index] = "Pekerjaan saya saat ini lokasinya lebih dekat dari rumah saya.";
+    headerRow[f1611Index] = "Pekerjaan saya saat ini dapat lebih menjamin kebutuhan keluarga saya.";
+    headerRow[f1612Index] = "Pada awal meniti karir ini, saya harus menerima pekerjaan yang tidak berhubungan dengan pendidikan saya";
+    headerRow[f1613Index] = "Lainnya";
 
-            // Proses setiap baris data (logika konversi dari script asli)
-            for (let i = 1; i < jsonData.length; i++) {
-                const row = jsonData[i];
-                
-                // Konversi nilai untuk setiap kolom yang perlu diubah
-                // Implementasi konversi sesuai dengan script asli
-                // Untuk contoh ini, kita hanya akan melakukan beberapa konversi sederhana
-                
-                // Contoh: Konversi status (F8)
-                const statusIndex = columnMap["F8"]?.index;
-                if (statusIndex !== undefined && row[statusIndex] !== undefined) {
-                    const statusValue = parseInt(row[statusIndex]);
-                    switch(statusValue) {
-                        case 1: row[statusIndex] = 'Bekerja (full time / part time)'; break;
-                        case 2: row[statusIndex] = 'Belum memungkinkan bekerja'; break;
-                        case 3: row[statusIndex] = 'Wiraswasta'; break;
-                        case 4: row[statusIndex] = 'Melanjutkan Pendidikan'; break;
-                        case 5: row[statusIndex] = 'Tidak kerja tetapi sedang mencari kerja'; break;
-                    }
-                }
-                
-                // Contoh: Konversi jenis perusahaan (F1101)
-                const companyTypeIndex = columnMap["F1101"]?.index;
-                if (companyTypeIndex !== undefined && row[companyTypeIndex] !== undefined) {
-                    const companyTypeValue = parseInt(row[companyTypeIndex]);
-                    switch(companyTypeValue) {
-                        case 1: row[companyTypeIndex] = 'Instansi pemerintah'; break;
-                        case 2: row[companyTypeIndex] = 'Organisasi non-profit/Lembaga Swadaya Masyarakat'; break;
-                        case 3: row[companyTypeIndex] = 'Perusahaan swasta'; break;
-                        case 4: row[companyTypeIndex] = 'Wiraswasta/perusahaan sendiri'; break;
-                        case 5: row[companyTypeIndex] = 'Lainnya'; break;
-                        case 6: row[companyTypeIndex] = 'BUMN/BUMD'; break;
-                        case 7: row[companyTypeIndex] = 'Institusi/Organisasi Multilateral'; break;
-                    }
-                }
-                
-                // Tambahkan konversi lainnya sesuai kebutuhan...
-                // Untuk demo, kita hanya melakukan beberapa konversi di atas
-            }
-
-            // Buat worksheet baru
-            const newWorksheet = XLSX.utils.aoa_to_sheet(jsonData);
-
-            // Buat workbook baru
-            const newWorkbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, sheetName);
-
-            return { workbook: newWorkbook, columnMap };
+    // Buat map untuk tracking kolom yang diubah
+    const columnMap = {};
+    const columns = [
+        "F8", "F1101", "F502", "F505", "F5a1", "F5a2", "F5b", "F5c", "F5d", "F18a", 
+        "F18b", "F18c", "F18d", "F1201", "F14", "F15", "F1761", "F1762", "F1763", 
+        "F1764", "F1765", "F1766", "F1767", "F1768", "F1769", "F1770", "F1771", 
+        "F1772", "F1773", "F1774", "F21", "F22", "F23", "F24", "F25", "F26", "F27", 
+        "F301", "F302", "F303", "F401", "F402", "F403", "F404", "F405", "F406", 
+        "F407", "F408", "F409", "F410", "F411", "F412", "F413", "F414", "F415", 
+        "F6", "F7", "F7a", "F1001", "F1601", "F1602", "F1603", "F1604", "F1605", 
+        "F1606", "F1607", "F1608", "F1609", "F1610", "F1611", "F1612", "F1613"
+    ];
+    
+    columns.forEach(col => {
+        const index = headerRow.indexOf(col);
+        if (index !== -1) {
+            columnMap[col] = { index, newName: headerRow[index] };
         }
+    });
+
+    // Proses setiap baris data (logika konversi dari kode asli)
+    for (let i = 1; i < jsonData.length; i++) { 
+        const row = jsonData[i];
+        
+        // Konversi status (F8)
+        if (statusIndex !== -1 && row[statusIndex] !== undefined && row[statusIndex] !== null) {
+            const statusValue = parseInt(row[statusIndex]);
+            if (!isNaN(statusValue)) {
+                switch(statusValue) {
+                    case 1: row[statusIndex] = 'Bekerja (full time / part time)'; break;
+                    case 2: row[statusIndex] = 'Belum memungkinkan bekerja'; break;
+                    case 3: row[statusIndex] = 'Wiraswasta'; break;
+                    case 4: row[statusIndex] = 'Melanjutkan Pendidikan'; break;
+                    case 5: row[statusIndex] = 'Tidak kerja tetapi sedang mencari kerja'; break;
+                    default: break;
+                }
+            }
+        }
+
+        // Konversi jenis perusahaan (F1101)
+        if (jenisPerusahaanIndex !== -1 && row[jenisPerusahaanIndex] !== undefined && row[jenisPerusahaanIndex] !== null) {
+            const jenisPerusahaanValue = parseInt(row[jenisPerusahaanIndex]);
+            if (!isNaN(jenisPerusahaanValue)) {
+                switch(jenisPerusahaanValue) {
+                    case 1: row[jenisPerusahaanIndex] = 'Instansi pemerintah'; break;
+                    case 2: row[jenisPerusahaanIndex] = 'Organisasi non-profit/Lembaga Swadaya Masyarakat'; break;
+                    case 3: row[jenisPerusahaanIndex] = 'Perusahaan swasta'; break;
+                    case 4: row[jenisPerusahaanIndex] = 'Wiraswasta/perusahaan sendiri'; break;
+                    case 5: row[jenisPerusahaanIndex] = 'Lainnya'; break;
+                    case 6: row[jenisPerusahaanIndex] = 'BUMN/BUMD'; break;
+                    case 7: row[jenisPerusahaanIndex] = 'Institusi/Organisasi Multilateral'; break;
+                    default: row[jenisPerusahaanIndex] = ' '; break;
+                }
+            }
+        }
+
+        // Konversi posisi jika wiraswasta (F5c)
+        if (positionIfSelfEmployedIndex !== -1 && row[positionIfSelfEmployedIndex] !== undefined && row[positionIfSelfEmployedIndex] !== null) {
+            const posisiValue = parseInt(row[positionIfSelfEmployedIndex]);
+            if (!isNaN(posisiValue)) {
+                switch(posisiValue) {
+                    case 1: row[positionIfSelfEmployedIndex] = 'Founder'; break;
+                    case 2: row[positionIfSelfEmployedIndex] = 'Co-Founder'; break;
+                    case 3: row[positionIfSelfEmployedIndex] = 'Staff'; break;
+                    case 4: row[positionIfSelfEmployedIndex] = 'Freelance/Kerja Lepas'; break;
+                    default: break;
+                }
+            }
+        }
+
+        // Konversi tingkat perusahaan (F5d)
+        if (levelCompanyIndex !== -1 && row[levelCompanyIndex] !== undefined && row[levelCompanyIndex] !== null) {
+            const levelValue = parseInt(row[levelCompanyIndex]);
+            if (!isNaN(levelValue)) {
+                switch(levelValue) {
+                    case 1: row[levelCompanyIndex] = 'Lokal/Wilayah/Wiraswasta tidak berbadan hukum'; break;
+                    case 2: row[levelCompanyIndex] = 'Nasional/Wiraswasta berbadan hukum'; break;
+                    case 3: row[levelCompanyIndex] = 'Multinasional/Internasional'; break;
+                    default: row[levelCompanyIndex] = ' '; break;
+                }
+            }
+        }
+
+        // Konversi biaya kuliah (F1201)
+        if (biayaKuliahIndex !== -1 && row[biayaKuliahIndex] !== undefined && row[biayaKuliahIndex] !== null) {
+            const biayaValue = parseInt(row[biayaKuliahIndex]);
+            if (!isNaN(biayaValue)) {
+                switch(biayaValue) {
+                    case 1: row[biayaKuliahIndex] = 'Biaya Sendiri/Keluarga'; break;
+                    case 2: row[biayaKuliahIndex] = 'Beasiswa ADIK'; break;
+                    case 3: row[biayaKuliahIndex] = 'Beasiswa BIDIKMISI'; break;
+                    case 4: row[biayaKuliahIndex] = 'Beasiswa PPA'; break;
+                    case 5: row[biayaKuliahIndex] = 'Beasiswa AFIRMASI'; break;
+                    case 6: row[biayaKuliahIndex] = 'Beasiswa Perusahaan/Swasta'; break;
+                    case 7: row[biayaKuliahIndex] = 'Lainnya'; break;
+                    default: break;
+                }
+            }
+        }
+
+        // Konversi hubungan bidang studi (F14)
+        if (hubunganBidangStudiIndex !== -1 && row[hubunganBidangStudiIndex] !== undefined && row[hubunganBidangStudiIndex] !== null) {
+            const hubunganValue = parseInt(row[hubunganBidangStudiIndex]);
+            if (!isNaN(hubunganValue)) {
+                switch(hubunganValue) {
+                    case 1: row[hubunganBidangStudiIndex] = 'Sangat Erat'; break;
+                    case 2: row[hubunganBidangStudiIndex] = 'Erat'; break;
+                    case 3: row[hubunganBidangStudiIndex] = 'Cukup Erat'; break;
+                    case 4: row[hubunganBidangStudiIndex] = 'Kurang Erat'; break;
+                    case 5: row[hubunganBidangStudiIndex] = 'Tidak Sama Sekali'; break;
+                    default: row[hubunganBidangStudiIndex] = ' '; break;
+                }
+            }
+        }
+
+        // Konversi tingkat pendidikan yang tepat (F15)
+        if (tingkatPendidikanYangTepatIndex !== -1 && row[tingkatPendidikanYangTepatIndex] !== undefined && row[tingkatPendidikanYangTepatIndex] !== null) {
+            const tingkatValue = parseInt(row[tingkatPendidikanYangTepatIndex]);
+            if (!isNaN(tingkatValue)) {
+                switch(tingkatValue) {
+                    case 1: row[tingkatPendidikanYangTepatIndex] = 'Setingkat Lebih Tinggi'; break;
+                    case 2: row[tingkatPendidikanYangTepatIndex] = 'Tingkat yang Sama'; break;
+                    case 3: row[tingkatPendidikanYangTepatIndex] = 'Setingkat Lebih Rendah'; break;
+                    case 4: row[tingkatPendidikanYangTepatIndex] = 'Tidak Perlu Pendidikan Tinggi'; break;
+                    default: row[tingkatPendidikanYangTepatIndex] = ' '; break;
+                }
+            }
+        }
+
+        // Konversi etika, keahlian, bahasa inggris, TI, komunikasi, kerja sama, dan pengembangan
+const kompetensiIndices = [
+    { index: etikaAIndex, name: "Etika (A)" },
+    { index: etikaBIndex, name: "Etika (B)" },
+    { index: keahlianAIndex, name: "Keahlian berdasarkan bidang ilmu (A)" },
+    { index: keahlianBIndex, name: "Keahlian berdasarkan bidang ilmu (B)" },
+    { index: englishAIndex, name: "Bahasa Inggris (A)" },
+    { index: englishBIndex, name: "Bahasa Inggris (B)" },
+    { index: useItAIndex, name: "Penggunaan Teknologi Informasi (A)" },
+    { index: useItBIndex, name: "Penggunaan Teknologi Informasi (B)" },
+    { index: komunikasiAIndex, name: "Komunikasi (A)" },
+    { index: komunikasiBIndex, name: "Komunikasi (B)" },
+    { index: kerjaSamaAIndex, name: "Kerja Sama (A)" },
+    { index: kerjaSamaBIndex, name: "Kerja Sama (B)" },
+    { index: pengembanganAIndex, name: "Pengembangan (A)" },
+    { index: pengembanganBIndex, name: "Pengembangan (B)" }
+];
+
+kompetensiIndices.forEach(({ index, name }) => {
+    if (index !== -1 && row[index] !== undefined && row[index] !== null) {
+        const kompetensiValue = parseInt(row[index]);
+        if (!isNaN(kompetensiValue)) {
+            switch(kompetensiValue) {
+                case 1: row[index] = 'Sangat Rendah'; break;
+                case 2: row[index] = 'Rendah'; break;
+                case 3: row[index] = 'Sedang'; break;
+                case 4: row[index] = 'Tinggi'; break;
+                case 5: row[index] = 'Sangat Tinggi'; break;
+                default: break;
+            }
+        }
+    }
+});
+
+        // Konversi metode pembelajaran
+        const metodeIndices = [perkuliahanIndex, demonstrasiIndex, projekAkhirIndex, magangIndex, praktikumIndex, kerjaLapanganIndex, diskusiIndex];
+        metodeIndices.forEach(index => {
+            if (index !== -1 && row[index] !== undefined && row[index] !== null) {
+                const metodeValue = parseInt(row[index]);
+                if (!isNaN(metodeValue)) {
+                    switch(metodeValue) {
+                        case 1: row[index] = 'Sangat Besar'; break;
+                        case 2: row[index] = 'Besar'; break;
+                        case 3: row[index] = 'Cukup Besar'; break;
+                        case 4: row[index] = 'Kurang Besar'; break;
+                        case 5: row[index] = 'Tidak Sama Sekali'; break;
+                        default: break;
+                    }
+                }
+            }
+        });
+
+        // Konversi waktu mulai mencari kerja (F301)
+        if (f301Index !== -1 && row[f301Index] !== undefined && row[f301Index] !== null) {
+            const f301Value = parseInt(row[f301Index]);
+            if (!isNaN(f301Value)) {
+                switch(f301Value) {
+                    case 1:
+                        const f302Value = f302Index !== -1 ? row[f302Index] : '?';
+                        row[f301Index] = `Kira-kira ${f302Value} bulan sebelum lulus`;
+                        break;
+                    case 2:
+                        const f303Value = f303Index !== -1 ? row[f303Index] : '?';
+                        row[f301Index] = `Kira-kira ${f303Value} bulan setelah lulus`;
+                        break;
+                    case 3:
+                        row[f301Index] = "Saya tidak mencari kerja";
+                        break;
+                    default:
+                        row[f301Index] = " ";
+                        break;
+                }
+            }
+        }
+
+        // Konversi cara mencari pekerjaan
+        const findJobIndices = [f401Index, f402Index, f403Index, f404Index, f405Index, f406Index, f407Index, f408Index, f409Index, f410Index, f411Index, f412Index, f413Index, f414Index, f415Index];
+        findJobIndices.forEach(index => {
+            if (index !== -1 && row[index] !== undefined && row[index] !== null) {
+                const findJobValue = parseInt(row[index]);
+                if (!isNaN(findJobValue)) {
+                    switch(findJobValue) {
+                        case 0: row[index] = 'Tidak'; break;
+                        case 1: row[index] = 'Ya'; break;
+                        default: break;
+                    }
+                }
+            }
+        });
+
+        // Konversi aktif mencari kerja (F1001)
+        if (f1001Index !== -1 && row[f1001Index] !== undefined && row[f1001Index] !== null) {
+            const f1001Value = parseInt(row[f1001Index]);
+            if (!isNaN(f1001Value)) {
+                switch(f1001Value) {
+                    case 1: row[f1001Index] = "Tidak"; break;
+                    case 2: row[f1001Index] = "Tidak, tapi saya sedang menunggu hasil lamaran kerja"; break;
+                    case 3: row[f1001Index] = "Ya, saya akan mulai bekerja dalam 2 minggu ke depan"; break;
+                    case 4: row[f1001Index] = "Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan"; break;
+                    case 5: row[f1001Index] = "Lainnya"; break;
+                    default: row[f1001Index] = " "; break;
+                }
+            }
+        }
+
+        // Konversi kesesuaian pekerjaan
+        const kesesuaianIndices = [f1601Index, f1602Index, f1603Index, f1604Index, f1605Index, f1606Index, f1607Index, f1608Index, f1609Index, f1610Index, f1611Index, f1612Index, f1613Index];
+        kesesuaianIndices.forEach(index => {
+            if (index !== -1 && row[index] !== undefined && row[index] !== null) {
+                const kesesuaianValue = parseInt(row[index]);
+                if (!isNaN(kesesuaianValue)) {
+                    switch(kesesuaianValue) {
+                        case 0: row[index] = 'Tidak'; break;
+                        case 1: row[index] = 'Ya'; break;
+                        default: break;
+                    }
+                }
+            }
+        });
+
+
+    }
+
+    // Buat worksheet baru
+    const newWorksheet = XLSX.utils.aoa_to_sheet(jsonData);
+
+    // Buat workbook baru
+    const newWorkbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, sheetName);
+
+    return { workbook: newWorkbook, columnMap, jsonData };
+}
 
         // Fungsi untuk mengunduh file hasil
         function downloadFile() {
